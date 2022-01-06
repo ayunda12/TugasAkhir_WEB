@@ -1,0 +1,58 @@
+<?php 
+// mengaktifkan session pada php
+session_start();
+
+// menghubungkan php dengan koneksi database
+include 'koneksi.php';
+
+// menangkap data yang dikirim dari form login
+$username = $_POST['username'];
+$password = $_POST['password'];
+
+
+// menyeleksi data user dengan username dan password yang sesuai
+$login = mysqli_query($koneksi,"select * from user where username='$username' and password='$password'");
+// menghitung jumlah data yang ditemukan
+$cek = mysqli_num_rows($login);
+
+// cek apakah username dan password di temukan pada database
+if($cek > 0){
+
+	$data = mysqli_fetch_assoc($login);
+
+	// cek jika user login sebagai admin
+	if($data['level']=="1"){ 
+
+		// buat session login dan username
+		$_SESSION['username'] = $username;
+		$_SESSION['level'] = "1";
+		$_SESSION['foto'] = $data['foto'];
+		$_SESSION['nama'] = $data['nama'];
+		$_SESSION['id'] = $data['id_user'];
+		// alihkan ke halaman dashboard admin 
+		header("location:dashboard.php");
+
+	// cek jika user login sebagai pegawai
+	}else if($data['level']=="2"){
+		// buat session login dan username
+		$_SESSION['username'] = $username;
+		$_SESSION['nama'] = $data['nama'];
+		$_SESSION['id'] = $data['id_user'];
+		$_SESSION['no_telp'] = $data['no_telp'];
+		$_SESSION['alamat'] = $data['alamat'];
+		$_SESSION['foto'] = $data['foto'];
+		$_SESSION['level'] = "2";
+		// alihkan ke halaman dashboard pegawai
+		header("location:paketUser.php");
+
+	// cek jika user login sebagai pengurus
+	}else{
+
+		// alihkan ke halaman login kembali
+		header("location:loginpaket.php?pesan=gagal");
+	}	
+}else{
+	header("location:loginpaket.php?pesan=gagal");
+}
+
+?>
